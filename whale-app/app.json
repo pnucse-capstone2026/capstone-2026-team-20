@@ -1,0 +1,106 @@
+{
+  "expo": {
+    "name": "whale-app",
+    "slug": "whale-app",
+    "version": "1.0.5",
+    "orientation": "portrait",
+    "icon": "./assets/icons/whaleapp_icon.png",
+    "scheme": "whaleapp",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "com.whaledone.myapp",
+      "supportsTablet": true,
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.whaledone.myapp",
+      "versionCode": 2,
+      "softwareKeyboardLayoutMode": "resize",
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/icons/whaleapp.png",
+        "monochromeImage": "./assets/icons/whaleapp.png"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "kotlinVersion": "2.0.21"
+          }
+        }
+      ],
+      "./plugins/withKakaoMaven",
+      "./plugins/withSingleTaskMainActivity",
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/icons/whaleapp.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      "expo-video",
+      "expo-notifications",
+      "@react-native-google-signin/google-signin",
+      [
+        "@react-native-seoul/kakao-login",
+        {
+          "kakaoAppKey": "19be534e574dc7e8d8b3b3f7b8a8306f"
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "사진 업로드를 위해 사진첩 접근 권한이 필요합니다.",
+          "cameraPermission": "사진 촬영을 위해 카메라 접근 권한이 필요합니다.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "사진 촬영을 위해 카메라 접근 권한이 필요합니다.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "사진 업로드를 위해 사진첩 접근 권한이 필요합니다.",
+          "savePhotosPermission": "촬영한 사진을 저장하기 위해 사진첩 접근 권한이 필요합니다.",
+          "isAccessMediaLocationEnabled": false,
+          "granularPermissions": ["photo"]
+        }
+      ],
+      "expo-apple-authentication",
+      "expo-secure-store",
+      "expo-localization"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "701c2a7e-65cf-47d7-b6ed-3d3da2b9c7b9"
+      }
+    }
+  }
+}

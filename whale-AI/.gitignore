@@ -1,0 +1,19 @@
+.local_memory.json
+.cache/
+__pycache__/
+*.pyc
+*.pyo
+.env
+# Local Python/runtime caches
+.uv-cache/
+.uv-python/
+**/__pycache__/
+
+# Generated experiment outputs
+bench_*.jsonl
+experiments/safety/results/*.csv
+experiments/safety/results/*.json
+eval/results.csv
+eval/summary.json
+eval/*_results.csv
+eval/*_summary.json

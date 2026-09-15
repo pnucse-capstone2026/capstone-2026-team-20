@@ -1,0 +1,9 @@
+{
+  "image": "754840114427.dkr.ecr.ap-northeast-2.amazonaws.com/whale-ai:c1b76ff22d57a85d6082ae1502c7d0a2b5d3d47a",
+  "containerPort": 8000,
+  "secrets": [
+    {"name":"OPENAI_API_KEY","valueFrom":"arn:aws:secretsmanager:ap-northeast-2:754840114427:secret:whale-ai/openai-34R8Ut"},
+    {"name":"SUPABASE_URL","valueFrom":"arn:aws:secretsmanager:ap-northeast-2:754840114427:secret:whale-ai/supabase-2zTiQ8:url::"},
+    {"name":"SUPABASE_KEY","valueFrom":"arn:aws:secretsmanager:ap-northeast-2:754840114427:secret:whale-ai/supabase-2zTiQ8:key::"}
+  ]
+}

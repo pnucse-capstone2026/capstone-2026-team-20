@@ -1,0 +1,12 @@
+.git
+.github
+.cache
+__pycache__
+*.pyc
+*.pyo
+.env
+.env.*
+!.env.example
+.local_memory.json
+uvicorn.out.log
+uvicorn.err.log

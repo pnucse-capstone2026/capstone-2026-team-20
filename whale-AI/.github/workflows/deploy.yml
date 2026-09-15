@@ -1,0 +1,81 @@
+name: Deploy to ECS Express
+
+# main 브랜치에 push되면 이미지를 빌드해 ECR에 올리고 ECS Express 서비스를 새 이미지로 갱신한다.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}   
+
+permissions:
+  id-token: write 
+  contents: read
+
+env:
+  AWS_REGION: ap-northeast-2
+  ECR_REPO: 754840114427.dkr.ecr.ap-northeast-2.amazonaws.com/whale-ai
+  SERVICE_ARN: arn:aws:ecs:ap-northeast-2:754840114427:service/default/whale-ai
+  SECRET_ARN: arn:aws:secretsmanager:ap-northeast-2:754840114427:secret:whale-ai/openai-34R8Ut
+  SUPABASE_SECRET_ARN: arn:aws:secretsmanager:ap-northeast-2:754840114427:secret:whale-ai/supabase-2zTiQ8
+  MEMORY_ENC_SECRET_ARN: arn:aws:secretsmanager:ap-northeast-2:754840114427:secret:whale-ai/memory-enc-key-qwD3X3
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::754840114427:role/whale-ai-github-deploy
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image
+        run: |
+          IMAGE="$ECR_REPO:${GITHUB_SHA}"
+          docker build -t "$IMAGE" -t "$ECR_REPO:latest" .
+          docker push "$IMAGE"
+          docker push "$ECR_REPO:latest"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
+      - name: Deploy to ECS Express
+        run: |
+          aws ecs update-express-gateway-service \
+            --service-arn "$SERVICE_ARN" \
+            --primary-container "{\"image\":\"$IMAGE\",\"containerPort\":8000,\"secrets\":[{\"name\":\"OPENAI_API_KEY\",\"valueFrom\":\"$SECRET_ARN\"},{\"name\":\"SUPABASE_URL\",\"valueFrom\":\"$SUPABASE_SECRET_ARN:url::\"},{\"name\":\"SUPABASE_KEY\",\"valueFrom\":\"$SUPABASE_SECRET_ARN:key::\"},{\"name\":\"MEMORY_ENC_KEY\",\"valueFrom\":\"$MEMORY_ENC_SECRET_ARN\"}]}" \
+            --region "$AWS_REGION"
+          echo "Deployment triggered for $IMAGE"
+
+      # 위 단계는 API 호출만 하고 4초 만에 끝난다. 롤아웃이 20분이 걸리든 영영 안 끝나든
+      # 워크플로는 초록으로 보고했다. 실제로 교체됐는지 여기서 확인한다.
+      #
+      # 대기 시간이 30분인 이유: 이 서비스는 옛 태스크가 빠지는 데 실측 20분쯤 걸린다.
+      # (maxTaskCount 2 라 신·구 한 개씩 띄워 두고 천천히 교체한다)
+      # 15분으로 잡으면 배포가 정상인데도 빨간불이 뜬다.
+      - name: Verify rollout
+        run: |
+          for i in $(seq 1 120); do
+            ACTIVE=$(aws ecs describe-express-gateway-service \
+              --service-arn "$SERVICE_ARN" \
+              --region "$AWS_REGION" \
+              --query "service.activeConfigurations[].primaryContainer.image" \
+              --output text)
+            echo "[$i] ($((i * 15))s) active: $ACTIVE"
+
+            # 롤아웃 중에는 새 이미지와 옛 이미지가 함께 활성 상태로 뜬다.
+            # 옛 태스크가 살아 있는 동안은 요청이 그쪽으로 갈 수 있으므로,
+            # 새 이미지 '하나만' 남았을 때가 진짜 교체 완료다.
+            if [ "$ACTIVE" = "$IMAGE" ]; then
+              echo "배포 완료: $IMAGE"
+              exit 0
+            fi
+
+            sleep 15
+          done
+
+          echo "::error::30분 안에 $IMAGE 로 교체되지 않았다. ECS 서비스 이벤트와 태스크 중지 사유를 확인할 것."
+          exit 1
