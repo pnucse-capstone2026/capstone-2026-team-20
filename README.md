@@ -58,7 +58,7 @@ AI는 사용자의 글을 대신 완성하지 않습니다. 일기 원문과 의
 ### 4. 소개 및 시연 영상
 
 
-[![칭찬고래 소개영상](https://www.youtube.com/watch?v=mzHr7O9xXuY&list=PLLTdbmN_N8nc&index=19)
+[[칭찬고래소개영상]](https://www.youtube.com/watch?v=mzHr7O9xXuY&list=PLLTdbmN_N8nc&index=19)
 
 
 ### 5. 설치 및 사용법
